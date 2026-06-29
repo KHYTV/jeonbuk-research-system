@@ -1,0 +1,29 @@
+# ── 비밀키 / 환경변수 (절대 커밋 금지) ──────────────────────────
+.env
+*.env
+!.env.example
+api_key.env
+
+# ── 수집 데이터 / DB / 로그 (런타임 생성물) ────────────────────
+pipeline/data/*.db
+pipeline/data/*.sqlite
+pipeline/logs/
+*.log
+
+# ── 분석 산출물 (재생성 가능) ──────────────────────────────────
+jeonbuk/output/
+pipeline/report/*.html
+
+# ── 파이썬 ─────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.ipynb_checkpoints/
+
+# ── OS / 에디터 ────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
