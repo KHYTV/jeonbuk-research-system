@@ -86,10 +86,10 @@ def collect_sbiz(run_id: str) -> int:
             # 실제 API: 행정구역 코드로 조회
             params = {
                 "serviceKey": KEYS["DATAGOKR"],
-                "pageNo": 1, "numOfRows": 100,
-                "divId": "adongCd",
-                "key": meta["code"],
-                "_type": "json",
+                "pageNo": 1, "numOfRows": 1000,
+                "divId": "signguCd",       # 시군구 코드 기준(기존 adongCd+5자리코드는 불일치)
+                "key": meta["code"],        # 예: 전주 45111
+                "type": "json",
             }
             data = _get(ENDPOINTS["소상공인_상권"], params)
             if data:
@@ -129,13 +129,16 @@ def collect_mfds(run_id: str) -> int:
     """식품의약품안전처 음식점 인허가 변경 정보 → 시군별 신규·폐업"""
     t0 = time.time()
     rows = []
+    # 식약처 foodsafetykorea 는 data.go.kr 와 별개 키다. FOODSAFETY_API_KEY 가 있을 때만 실호출.
+    fkey = KEYS.get("FOODSAFETY", "")
+    got_real = False
 
     for muni, meta in MUNICIPALITIES.items():
-        if KEYS["DATAGOKR"]:
-            url = f"https://openapi.foodsafetykorea.go.kr/api/{KEYS['DATAGOKR']}/COOKRTRQESINFO/json/1/100"
+        if fkey:
+            url = f"https://openapi.foodsafetykorea.go.kr/api/{fkey}/COOKRTRQESINFO/json/1/100"
             params = {"SIGUN_NM": muni.replace("시","").replace("군","")}
             data = _get(url, params)
-            if data and isinstance(data, dict):
+            if data and isinstance(data, dict) and "COOKRTRQESINFO" in data:
                 items = data.get("COOKRTRQESINFO", {}).get("row", [])
                 new_c  = sum(1 for it in items if it.get("BSNS_SE_NM") == "신규")
                 close_c= sum(1 for it in items if it.get("BSNS_SE_NM") in ["폐업","취소"])
@@ -143,9 +146,10 @@ def collect_mfds(run_id: str) -> int:
                     {"source":"mfds","municipality":muni,"indicator":"음식점_신규","category":"C","value":float(new_c)},
                     {"source":"mfds","municipality":muni,"indicator":"음식점_폐업","category":"C","value":float(close_c)},
                 ]
+                got_real = True
                 continue
 
-        # Mock
+        # Mock 폴백
         rows += [
             {"source":"mfds_mock","municipality":muni,"indicator":"음식점_신규","category":"C",
              "value":_mock_value("신규_음식점_등록", muni)},
@@ -154,8 +158,9 @@ def collect_mfds(run_id: str) -> int:
         ]
 
     n = _save(rows, run_id)
-    log_collect(run_id, "mfds", "mock" if not KEYS["DATAGOKR"] else "ok", n, duration=time.time()-t0)
-    log.info(f"  [식약처] {n}건")
+    status = "ok" if got_real else "mock"   # 실제 데이터가 왔을 때만 ok (거짓 상태 방지)
+    log_collect(run_id, "mfds", status, n, duration=time.time()-t0)
+    log.info(f"  [식약처] {status} — {n}건")
     return n
 
 

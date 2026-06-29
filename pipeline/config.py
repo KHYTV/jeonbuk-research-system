@@ -30,6 +30,8 @@ KEYS = {
     "NAVER_SEC":   os.getenv("NAVER_CLIENT_SECRET", ""),
     # 빅카인즈
     "BIGKINDS":    os.getenv("BIGKINDS_API_KEY", ""),
+    # 식약처 데이터포털(foodsafetykorea) — data.go.kr 와 별개 키
+    "FOODSAFETY":  os.getenv("FOODSAFETY_API_KEY", ""),
 }
 
 # ══════════════════════════════════════════════
@@ -37,7 +39,7 @@ KEYS = {
 # ══════════════════════════════════════════════
 ENDPOINTS = {
     # ── 경제 ──
-    "소상공인_상권":       "https://apis.data.go.kr/B553077/api/open/sdsc2/storeListInAdmArea",
+    "소상공인_상권":       "https://apis.data.go.kr/B553077/api/open/sdsc2/storeListInDong",
     "음식점_인허가":       "https://apis.data.go.kr/1741000/r2/foodFacility",
     "식약처_음식점변경":   "https://openapi.foodsafetykorea.go.kr/api/{key}/COOKRTRQESINFO/json/1/100",
     # ── 인구 ──
