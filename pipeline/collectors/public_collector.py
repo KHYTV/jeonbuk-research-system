@@ -75,48 +75,44 @@ def _mock_value(indicator: str, muni: str) -> float:
 # ══════════════════════════════════════════════
 # E. 경제 — 소상공인 상권 API
 # ══════════════════════════════════════════════
+# 전북특별자치도(2024~, 코드 52) 시군구 코드. 전주는 완산(52111)+덕진(52113).
+SBIZ_SIGNGU = {
+    "전주시":["52111","52113"], "군산시":["52130"], "익산시":["52140"],
+    "정읍시":["52180"], "남원시":["52190"], "김제시":["52210"],
+    "완주군":["52710"], "진안군":["52720"], "무주군":["52730"], "장수군":["52740"],
+    "임실군":["52750"], "순창군":["52760"], "고창군":["52770"], "부안군":["52790"],
+}
+
 def collect_sbiz(run_id: str) -> int:
-    """소상공인진흥공단 상권정보 API → 음식점·카페 업종 시군별 신규·폐업 집계"""
+    """소상공인 상권정보 API → 시군별 '음식점 수'(indsLclsCd=I2 totalCount).
+    스냅샷 집계라 '신규 등록'이 아니라 현재 영업 음식점 수다(증감은 주간 누적 필요)."""
     t0 = time.time()
     rows = []
-    status = "mock"
+    got_real = False
 
-    for muni, meta in MUNICIPALITIES.items():
-        if KEYS["DATAGOKR"]:
-            # 실제 API: 행정구역 코드로 조회
-            params = {
-                "serviceKey": KEYS["DATAGOKR"],
-                "pageNo": 1, "numOfRows": 1000,
-                "divId": "signguCd",       # 시군구 코드 기준(기존 adongCd+5자리코드는 불일치)
-                "key": meta["code"],        # 예: 전주 45111
-                "type": "json",
-            }
-            data = _get(ENDPOINTS["소상공인_상권"], params)
-            if data:
-                items = (data.get("body", {}).get("items", {}).get("item", [])
-                         if isinstance(data, dict) else [])
-                # 음식점류 신규 등록 필터
-                food_codes = ["Q12", "Q13"]  # 음식·음료업 대분류
-                new_food = sum(1 for it in items
-                               if it.get("indsLclsCd","") in food_codes
-                               and it.get("opnSvcId",""))
+    for muni in MUNICIPALITIES:
+        if KEYS["DATAGOKR"] and muni in SBIZ_SIGNGU:
+            total, ok = 0, False
+            for code in SBIZ_SIGNGU[muni]:
+                data = _get(ENDPOINTS["소상공인_상권"], {
+                    "serviceKey": KEYS["DATAGOKR"], "pageNo":1, "numOfRows":1,
+                    "divId":"signguCd", "key":code, "indsLclsCd":"I2", "type":"json",
+                })
+                tc = data.get("body",{}).get("totalCount") if isinstance(data,dict) else None
+                if tc is not None:
+                    total += int(tc); ok = True
+            if ok:
                 rows.append({"source":"sbiz","municipality":muni,
-                             "indicator":"신규_음식점_등록","category":"C",
-                             "value": float(new_food), "meta": {"api":"sbiz"}})
-                status = "ok"
+                             "indicator":"음식점_수","category":"C","value":float(total)})
+                got_real = True
                 continue
-
         # Mock 폴백
         rows.append({"source":"sbiz_mock","municipality":muni,
-                     "indicator":"신규_음식점_등록","category":"C",
-                     "value": _mock_value("신규_음식점_등록", muni),
-                     "meta": {"mock": True}})
-        rows.append({"source":"sbiz_mock","municipality":muni,
-                     "indicator":"소상공인_신규_등록","category":"E",
-                     "value": _mock_value("소상공인_신규_등록", muni),
-                     "meta": {"mock": True}})
+                     "indicator":"음식점_수","category":"C",
+                     "value": _mock_value("신규_음식점_등록", muni)})
 
     n = _save(rows, run_id)
+    status = "ok" if got_real else "mock"
     log_collect(run_id, "sbiz", status, n, duration=time.time()-t0)
     log.info(f"  [소상공인] {status} — {n}건")
     return n
@@ -267,37 +263,58 @@ def collect_airkorea(run_id: str) -> int:
 # ══════════════════════════════════════════════
 # H. 보건 — HIRA 의료기관 현황
 # ══════════════════════════════════════════════
+def _hira_to_muni(sggu: str):
+    """HIRA 시군구명(예: 전주완산구, 군산시) → 14개 시군 매핑."""
+    if not sggu:
+        return None
+    if sggu.startswith("전주"):
+        return "전주시"
+    for m in MUNICIPALITIES:
+        if sggu.startswith(m) or m.replace("시","").replace("군","") in sggu:
+            return m
+    return None
+
 def collect_hira(run_id: str) -> int:
+    """HIRA 병원정보 → 시군별 '의료기관 수'. 전북 sidoCd=350000(45 아님) 전체를
+    한 번에 받아 시군구명으로 집계. 감염병_신고수는 이 API에 없어 별도 mock(KDCA 키 필요)."""
     t0 = time.time()
     rows = []
+    got_real = False
 
-    for muni, meta in MUNICIPALITIES.items():
-        if KEYS["DATAGOKR"]:
-            params = {
-                "serviceKey": KEYS["DATAGOKR"],
-                "pageNo":1, "numOfRows":100,
-                "sidoCd":"45",
-                "sgguCd": meta["code"][:5],
-                "_type":"json",
-            }
-            data = _get(ENDPOINTS["HIRA_의료기관"], params)
-            if data:
-                items = (data.get("response",{}).get("body",{})
-                            .get("items",{}).get("item",[])
-                         if isinstance(data,dict) else [])
+    if KEYS["DATAGOKR"]:
+        data = _get(ENDPOINTS["HIRA_의료기관"], {
+            "serviceKey": KEYS["DATAGOKR"], "pageNo":1, "numOfRows":3000,
+            "sidoCd":"350000", "_type":"json",   # 350000 = 전북특별자치도
+        })
+        items = []
+        if isinstance(data, dict):
+            items = data.get("response",{}).get("body",{}).get("items",{}).get("item",[])
+            if isinstance(items, dict):
+                items = [items]
+        if items:
+            from collections import Counter
+            cnt = Counter()
+            for it in items:
+                m = _hira_to_muni(it.get("sgguCdNm",""))
+                if m:
+                    cnt[m] += 1
+            for muni in MUNICIPALITIES:
                 rows.append({"source":"hira","municipality":muni,
-                             "indicator":"의료기관_수","category":"H",
-                             "value":float(len(items))})
-                continue
+                             "indicator":"의료기관_수","category":"H","value":float(cnt.get(muni,0))})
+            got_real = True
 
-        rows += [
-            {"source":"hira_mock","municipality":muni,"indicator":"의료기관_수","category":"H",
-             "value":_mock_value("의료기관_수",muni)},
-            {"source":"hira_mock","municipality":muni,"indicator":"감염병_신고수","category":"H",
-             "value":_mock_value("감염병_신고수",muni)},
-        ]
+    if not got_real:
+        for muni in MUNICIPALITIES:
+            rows.append({"source":"hira_mock","municipality":muni,
+                         "indicator":"의료기관_수","category":"H","value":_mock_value("의료기관_수",muni)})
+
+    # 감염병_신고수: HIRA API에 없음 → 별도 mock (실데이터는 KDCA 감염병 API 키 필요)
+    for muni in MUNICIPALITIES:
+        rows.append({"source":"hira_mock","municipality":muni,
+                     "indicator":"감염병_신고수","category":"H","value":_mock_value("감염병_신고수",muni)})
 
     n = _save(rows, run_id)
-    log_collect(run_id,"hira","mock" if not KEYS["DATAGOKR"] else "ok",n,duration=time.time()-t0)
-    log.info(f"  [HIRA] {n}건")
+    status = "ok" if got_real else "mock"
+    log_collect(run_id,"hira",status,n,duration=time.time()-t0)
+    log.info(f"  [HIRA] {status} — {n}건")
     return n
