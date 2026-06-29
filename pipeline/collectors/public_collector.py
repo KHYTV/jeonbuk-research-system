@@ -221,20 +221,24 @@ def collect_airkorea(run_id: str) -> int:
         if data:
             items = (data.get("response",{}).get("body",{})
                         .get("items",[]) if isinstance(data,dict) else [])
-            station_to_muni = {
-                "전주": "전주시", "군산": "군산시", "익산": "익산시",
-                "정읍": "정읍시", "남원": "남원시", "김제": "김제시",
-            }
+            # 실응답은 cityName(예: "전주","고창군")을 준다. 시/군 접미사를 떼고
+            # 14개 시군 전체를 정규화 매핑한다(기존엔 stationName·6개만 봐서 0건 매칭→mock).
+            def _norm(s): return s.replace("시","").replace("군","").strip()
+            name_to_muni = {_norm(m): m for m in MUNICIPALITIES}
+            def _num(v):
+                try: return float(v)
+                except (TypeError, ValueError): return None  # "-" 등 결측
             for it in items:
-                muni = station_to_muni.get(it.get("stationName",""), None)
+                muni = name_to_muni.get(_norm(it.get("cityName","")), None)
                 if not muni:
                     continue
-                rows += [
-                    {"source":"airkorea","municipality":muni,"indicator":"PM10_일평균","category":"V",
-                     "value":float(it.get("pm10Value",0) or 0)},
-                    {"source":"airkorea","municipality":muni,"indicator":"PM25_일평균","category":"V",
-                     "value":float(it.get("pm25Value",0) or 0)},
-                ]
+                pm10, pm25 = _num(it.get("pm10Value")), _num(it.get("pm25Value"))
+                if pm10 is not None:
+                    rows.append({"source":"airkorea","municipality":muni,
+                                 "indicator":"PM10_일평균","category":"V","value":pm10})
+                if pm25 is not None:
+                    rows.append({"source":"airkorea","municipality":muni,
+                                 "indicator":"PM25_일평균","category":"V","value":pm25})
             if rows:
                 n = _save(rows, run_id)
                 log_collect(run_id,"airkorea","ok",n,duration=time.time()-t0)

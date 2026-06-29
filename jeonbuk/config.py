@@ -6,10 +6,11 @@ config.py - 전북 신호탐지 엔진 중앙 설정.
 
 from pathlib import Path
 
-# jeonbuk/.env 가 있으면 자동 로드 (NAVER/BIGKINDS/ANTHROPIC 키)
+# .env 자동 로드 — 저장소 루트(우선) + jeonbuk/.env (NAVER/BIGKINDS/ANTHROPIC 키)
 try:
     from dotenv import load_dotenv
-    load_dotenv(Path(__file__).parent / ".env")
+    load_dotenv(Path(__file__).parent.parent / ".env")   # 저장소 루트
+    load_dotenv(Path(__file__).parent / ".env")           # 패키지 로컬(있으면)
 except Exception:
     pass
 

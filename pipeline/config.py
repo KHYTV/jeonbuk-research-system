@@ -6,6 +6,13 @@ API 키가 없으면 각 수집기가 Mock 데이터로 자동 폴백합니다.
 """
 import os
 
+# 저장소 루트의 .env 자동 로드 (있으면)
+try:
+    from dotenv import load_dotenv
+    load_dotenv(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", ".env"))
+except Exception:
+    pass
+
 # ══════════════════════════════════════════════
 # API 키 (환경변수 또는 직접 입력)
 # ══════════════════════════════════════════════
