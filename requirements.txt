@@ -13,3 +13,8 @@ beautifulsoup4>=4.12.0
 
 # 선택: 한국어 형태소 분석(토픽 키워드 품질 향상)
 # konlpy>=0.6.0
+
+# 리포트 PDF 생성
+reportlab>=4.0.0
+matplotlib>=3.7.0
+pdfplumber>=0.10.0

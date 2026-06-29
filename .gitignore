@@ -27,3 +27,6 @@ venv/
 Thumbs.db
 .vscode/
 .idea/
+
+# 리포트 임시 차트
+reports/_charts/
