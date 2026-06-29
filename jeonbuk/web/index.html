@@ -134,463 +134,205 @@
   </div>
 
   <footer>
-    샘플 데이터 — 합성 패널에 알려진 이상신호(군산시: 카드매출↓·폐업↑·응급실내원↑)와 선행관계가 주입됨.<br>
-    Granger 인과는 <b>예측적 선행</b>이며 인과 확정이 아님. 다중비교(14시군×매주)로 임계 부근 우연양성 가능 → D² 랭킹·다주 지속성으로 보정 권장.
+    <b>실데이터</b> — 경제(소상공인 음식점 수)·보건(HIRA 의료기관 수)·환경(에어코리아 PM10/PM25)·뉴스(네이버)는 실수집,
+    인구이동·감염병 등 일부는 키 발급 전까지 추정치. 개수형 지표는 <b>인구 1만명당으로 정규화</b>(도시 크기 효과 제거).<br>
+    한 주 14개 시군을 서로 비교한 <b>횡단면 Mahalanobis</b> 분석 — 시차 인과(Granger)는 주간 데이터가 누적되면 추가됨.
   </footer>
 </div>
 
 <script>
 // ── 분석 결과 (run_weekly 산출 JSON을 그대로 임베드) ──────────────────────
 const REPORT = {
-  "week": "2025-05-05",
+  "week": "2026-06-30",
   "n_regions_scanned": 14,
-  "n_hot_places": 4,
+  "n_hot_places": 3,
   "hot_places": [
     {
-      "region": "군산시",
-      "d2": 338.37,
-      "p_value": 0.0,
-      "n_baseline_weeks": 26,
+      "region": "무주군",
+      "d2": 7.57,
+      "p_value": 0.181706,
+      "method": "전북 14개 시군 횡단면 비교 (인구정규화)",
+      "n_baseline_weeks": 1,
       "hot_items": [
         {
-          "indicator": "카드매출지수",
+          "indicator": "음식점_폐업",
           "domain": "경제",
-          "share": 0.457,
-          "z": -8.88,
-          "direction": "하락"
+          "share": 0.406,
+          "z": 2.74,
+          "direction": "상승",
+          "estimated": true
         },
         {
-          "indicator": "폐업수",
-          "domain": "경제",
-          "share": 0.27,
-          "z": 7.03,
-          "direction": "상승"
+          "indicator": "전출_인구",
+          "domain": "인구이동",
+          "share": 0.199,
+          "z": 1.92,
+          "direction": "상승",
+          "estimated": true
         },
         {
-          "indicator": "응급실내원",
-          "domain": "보건",
-          "share": 0.162,
-          "z": 5.86,
-          "direction": "상승"
+          "indicator": "음식점_수",
+          "domain": "경제",
+          "share": 0.138,
+          "z": 1.59,
+          "direction": "상승",
+          "estimated": false
+        },
+        {
+          "indicator": "20대_순이동",
+          "domain": "인구이동",
+          "share": 0.134,
+          "z": -1.57,
+          "direction": "하락",
+          "estimated": true
         }
       ],
-      "causal_edges": [
-        {
-          "source": "감염병신고",
-          "target": "카드매출지수",
-          "lag": 1,
-          "p_value": 0.0005,
-          "source_domain": "보건",
-          "target_domain": "경제"
-        },
-        {
-          "source": "카드매출지수",
-          "target": "폐업수",
-          "lag": 1,
-          "p_value": 0.002,
-          "source_domain": "경제",
-          "target_domain": "경제"
-        },
-        {
-          "source": "전출",
-          "target": "카드매출지수",
-          "lag": 2,
-          "p_value": 0.0025,
-          "source_domain": "인구이동",
-          "target_domain": "경제"
-        },
-        {
-          "source": "폐업수",
-          "target": "카드매출지수",
-          "lag": 1,
-          "p_value": 0.0028,
-          "source_domain": "경제",
-          "target_domain": "경제"
-        },
-        {
-          "source": "고용률",
-          "target": "카드매출지수",
-          "lag": 1,
-          "p_value": 0.0034,
-          "source_domain": "경제",
-          "target_domain": "경제"
-        },
-        {
-          "source": "전출",
-          "target": "폐업수",
-          "lag": 4,
-          "p_value": 0.0044,
-          "source_domain": "인구이동",
-          "target_domain": "경제"
-        },
-        {
-          "source": "응급실내원",
-          "target": "폐업수",
-          "lag": 1,
-          "p_value": 0.0052,
-          "source_domain": "보건",
-          "target_domain": "경제"
-        },
-        {
-          "source": "정신건강상담",
-          "target": "카드매출지수",
-          "lag": 4,
-          "p_value": 0.0117,
-          "source_domain": "보건",
-          "target_domain": "경제"
-        },
-        {
-          "source": "폐기물발생량",
-          "target": "카드매출지수",
-          "lag": 1,
-          "p_value": 0.0144,
-          "source_domain": "환경",
-          "target_domain": "경제"
-        },
-        {
-          "source": "폐기물발생량",
-          "target": "응급실내원",
-          "lag": 1,
-          "p_value": 0.0178,
-          "source_domain": "환경",
-          "target_domain": "보건"
-        }
-      ]
+      "causal_edges": []
     },
     {
-      "region": "전주시",
-      "d2": 38.65,
-      "p_value": 0.001999,
-      "n_baseline_weeks": 26,
+      "region": "순창군",
+      "d2": 10.05,
+      "p_value": 0.006575,
+      "method": "전북 14개 시군 횡단면 비교 (인구정규화)",
+      "n_baseline_weeks": 1,
       "hot_items": [
         {
-          "indicator": "전출",
-          "domain": "인구이동",
-          "share": 0.376,
-          "z": -3.73,
-          "direction": "하락"
-        },
-        {
-          "indicator": "신규창업수",
+          "indicator": "음식점_수",
           "domain": "경제",
-          "share": 0.212,
-          "z": 2.61,
-          "direction": "상승"
+          "share": 0.721,
+          "z": -2.71,
+          "direction": "하락",
+          "estimated": false
         },
         {
-          "indicator": "의료기관방문",
-          "domain": "보건",
-          "share": 0.112,
-          "z": -2.03,
-          "direction": "하락"
-        },
-        {
-          "indicator": "전입",
-          "domain": "인구이동",
-          "share": 0.076,
-          "z": 1.63,
-          "direction": "상승"
+          "indicator": "음식점_신규",
+          "domain": "경제",
+          "share": 0.279,
+          "z": 1.69,
+          "direction": "상승",
+          "estimated": true
         }
       ],
-      "causal_edges": [
-        {
-          "source": "전입",
-          "target": "전출",
-          "lag": 3,
-          "p_value": 0.001,
-          "source_domain": "인구이동",
-          "target_domain": "인구이동"
-        },
-        {
-          "source": "용수사용량",
-          "target": "전입",
-          "lag": 3,
-          "p_value": 0.0219,
-          "source_domain": "환경",
-          "target_domain": "인구이동"
-        },
-        {
-          "source": "인구수",
-          "target": "신규창업수",
-          "lag": 2,
-          "p_value": 0.0268,
-          "source_domain": "인구이동",
-          "target_domain": "경제"
-        },
-        {
-          "source": "신규창업수",
-          "target": "전입",
-          "lag": 2,
-          "p_value": 0.0348,
-          "source_domain": "경제",
-          "target_domain": "인구이동"
-        },
-        {
-          "source": "신규창업수",
-          "target": "의료기관방문",
-          "lag": 1,
-          "p_value": 0.0364,
-          "source_domain": "경제",
-          "target_domain": "보건"
-        }
-      ]
+      "causal_edges": []
     },
     {
-      "region": "완주군",
-      "d2": 36.71,
-      "p_value": 0.003686,
-      "n_baseline_weeks": 26,
+      "region": "부안군",
+      "d2": 5.18,
+      "p_value": 0.15938,
+      "method": "전북 14개 시군 횡단면 비교 (인구정규화)",
+      "n_baseline_weeks": 1,
       "hot_items": [
         {
-          "indicator": "미세먼지PM10",
+          "indicator": "음식점_신규",
+          "domain": "경제",
+          "share": 0.448,
+          "z": 2.18,
+          "direction": "상승",
+          "estimated": true
+        },
+        {
+          "indicator": "전출_인구",
+          "domain": "인구이동",
+          "share": 0.328,
+          "z": -1.87,
+          "direction": "하락",
+          "estimated": true
+        },
+        {
+          "indicator": "PM10_일평균",
           "domain": "환경",
-          "share": 0.209,
-          "z": 2.98,
-          "direction": "상승"
-        },
-        {
-          "indicator": "신규창업수",
-          "domain": "경제",
-          "share": 0.137,
-          "z": -2.3,
-          "direction": "하락"
-        },
-        {
-          "indicator": "카드매출지수",
-          "domain": "경제",
-          "share": 0.096,
-          "z": -1.85,
-          "direction": "하락"
-        },
-        {
-          "indicator": "전출",
-          "domain": "인구이동",
-          "share": 0.087,
+          "share": 0.224,
           "z": -1.54,
-          "direction": "하락"
+          "direction": "하락",
+          "estimated": false
         }
       ],
-      "causal_edges": [
-        {
-          "source": "인구수",
-          "target": "전출",
-          "lag": 1,
-          "p_value": 0.0057,
-          "source_domain": "인구이동",
-          "target_domain": "인구이동"
-        },
-        {
-          "source": "신규창업수",
-          "target": "카드매출지수",
-          "lag": 3,
-          "p_value": 0.0195,
-          "source_domain": "경제",
-          "target_domain": "경제"
-        },
-        {
-          "source": "의료기관방문",
-          "target": "카드매출지수",
-          "lag": 1,
-          "p_value": 0.027,
-          "source_domain": "보건",
-          "target_domain": "경제"
-        },
-        {
-          "source": "미세먼지PM10",
-          "target": "전출",
-          "lag": 3,
-          "p_value": 0.0343,
-          "source_domain": "환경",
-          "target_domain": "인구이동"
-        }
-      ]
-    },
-    {
-      "region": "남원시",
-      "d2": 35.48,
-      "p_value": 0.005385,
-      "n_baseline_weeks": 26,
-      "hot_items": [
-        {
-          "indicator": "카드매출지수",
-          "domain": "경제",
-          "share": 0.309,
-          "z": 3.24,
-          "direction": "상승"
-        },
-        {
-          "indicator": "고용률",
-          "domain": "경제",
-          "share": 0.28,
-          "z": -3.12,
-          "direction": "하락"
-        },
-        {
-          "indicator": "순이동",
-          "domain": "인구이동",
-          "share": 0.197,
-          "z": -2.55,
-          "direction": "하락"
-        },
-        {
-          "indicator": "의료기관방문",
-          "domain": "보건",
-          "share": 0.113,
-          "z": -1.67,
-          "direction": "하락"
-        }
-      ],
-      "causal_edges": [
-        {
-          "source": "미세먼지PM10",
-          "target": "고용률",
-          "lag": 1,
-          "p_value": 0.0017,
-          "source_domain": "환경",
-          "target_domain": "경제"
-        },
-        {
-          "source": "신규창업수",
-          "target": "카드매출지수",
-          "lag": 2,
-          "p_value": 0.0045,
-          "source_domain": "경제",
-          "target_domain": "경제"
-        },
-        {
-          "source": "의료기관방문",
-          "target": "고용률",
-          "lag": 4,
-          "p_value": 0.0068,
-          "source_domain": "보건",
-          "target_domain": "경제"
-        },
-        {
-          "source": "인구수",
-          "target": "순이동",
-          "lag": 4,
-          "p_value": 0.0238,
-          "source_domain": "인구이동",
-          "target_domain": "인구이동"
-        },
-        {
-          "source": "사업체수",
-          "target": "순이동",
-          "lag": 3,
-          "p_value": 0.0266,
-          "source_domain": "경제",
-          "target_domain": "인구이동"
-        },
-        {
-          "source": "정신건강상담",
-          "target": "순이동",
-          "lag": 4,
-          "p_value": 0.0312,
-          "source_domain": "보건",
-          "target_domain": "인구이동"
-        },
-        {
-          "source": "응급실내원",
-          "target": "카드매출지수",
-          "lag": 3,
-          "p_value": 0.0337,
-          "source_domain": "보건",
-          "target_domain": "경제"
-        },
-        {
-          "source": "응급실내원",
-          "target": "고용률",
-          "lag": 1,
-          "p_value": 0.0353,
-          "source_domain": "보건",
-          "target_domain": "경제"
-        }
-      ]
+      "causal_edges": []
     }
   ],
   "ranking": [
     {
-      "region": "군산시",
-      "d2": 338.37,
-      "p_value": 0.0,
+      "region": "순창군",
+      "d2": 3.17,
+      "p_value": 0.01816,
       "is_hot": true
-    },
-    {
-      "region": "전주시",
-      "d2": 38.65,
-      "p_value": 0.002,
-      "is_hot": true
-    },
-    {
-      "region": "완주군",
-      "d2": 36.71,
-      "p_value": 0.00369,
-      "is_hot": true
-    },
-    {
-      "region": "남원시",
-      "d2": 35.48,
-      "p_value": 0.00538,
-      "is_hot": true
-    },
-    {
-      "region": "고창군",
-      "d2": 31.63,
-      "p_value": 0.01673,
-      "is_hot": false
-    },
-    {
-      "region": "정읍시",
-      "d2": 30.64,
-      "p_value": 0.02207,
-      "is_hot": false
-    },
-    {
-      "region": "진안군",
-      "d2": 29.48,
-      "p_value": 0.03038,
-      "is_hot": false
     },
     {
       "region": "익산시",
-      "d2": 28.1,
-      "p_value": 0.04384,
-      "is_hot": false
-    },
-    {
-      "region": "임실군",
-      "d2": 26.63,
-      "p_value": 0.06365,
-      "is_hot": false
-    },
-    {
-      "region": "부안군",
-      "d2": 25.51,
-      "p_value": 0.08381,
-      "is_hot": false
-    },
-    {
-      "region": "김제시",
-      "d2": 22.92,
-      "p_value": 0.15195,
-      "is_hot": false
-    },
-    {
-      "region": "순창군",
-      "d2": 22.5,
-      "p_value": 0.1663,
+      "d2": 2.88,
+      "p_value": 0.0402,
       "is_hot": false
     },
     {
       "region": "무주군",
-      "d2": 20.61,
-      "p_value": 0.24415,
-      "is_hot": false
+      "d2": 2.75,
+      "p_value": 0.05584,
+      "is_hot": true
     },
     {
       "region": "장수군",
-      "d2": 15.04,
-      "p_value": 0.59246,
+      "d2": 2.58,
+      "p_value": 0.08275,
+      "is_hot": false
+    },
+    {
+      "region": "군산시",
+      "d2": 2.41,
+      "p_value": 0.12158,
+      "is_hot": false
+    },
+    {
+      "region": "부안군",
+      "d2": 2.27,
+      "p_value": 0.15938,
+      "is_hot": true
+    },
+    {
+      "region": "고창군",
+      "d2": 2.18,
+      "p_value": 0.19191,
+      "is_hot": false
+    },
+    {
+      "region": "임실군",
+      "d2": 2.11,
+      "p_value": 0.21737,
+      "is_hot": false
+    },
+    {
+      "region": "진안군",
+      "d2": 2.08,
+      "p_value": 0.2295,
+      "is_hot": false
+    },
+    {
+      "region": "남원시",
+      "d2": 1.64,
+      "p_value": 0.442,
+      "is_hot": false
+    },
+    {
+      "region": "전주시",
+      "d2": 1.13,
+      "p_value": 0.7357,
+      "is_hot": false
+    },
+    {
+      "region": "김제시",
+      "d2": 1.12,
+      "p_value": 0.74212,
+      "is_hot": false
+    },
+    {
+      "region": "정읍시",
+      "d2": 1.02,
+      "p_value": 0.79148,
+      "is_hot": false
+    },
+    {
+      "region": "완주군",
+      "d2": 0.84,
+      "p_value": 0.87149,
       "is_hot": false
     }
   ]
@@ -600,7 +342,7 @@ const DOMAIN_COLOR={"경제":"var(--eco)","환경":"var(--env)","보건":"var(--
 const DOMAIN_HEX={"경제":"#4da3ff","환경":"#3ecf8e","보건":"#ff6b6b","인구이동":"#b794f6"};
 
 // ── 분석 브리프 (run_brief 산출: 시군별 기사·토픽·출처) ──────────────────
-const BRIEF = {"군산시": {"region": "군산시", "n_articles": 20, "top_keywords": ["변화", "소비", "매출", "최근", "파악", "지자체", "상공계", "관측되고"], "topics": [{"rank": 1, "weight": 0.294, "keywords": ["흐름", "현상일", "맞물려", "인근", "전문가들", "있다고"]}, {"rank": 2, "weight": 0.203, "keywords": ["소비", "나섰다", "파악", "지자체", "원인", "최근"]}, {"rank": 3, "weight": 0.192, "keywords": ["매출", "커지고", "평소", "지역경제", "주민", "지표"]}, {"rank": 4, "weight": 0.157, "keywords": ["폐업", "응급실", "파악", "지자체", "일대", "최근"]}, {"rank": 5, "weight": 0.154, "keywords": ["폐점", "응급환자", "커지고", "지역경제", "주민", "지표"]}], "article_title": "군산시 분석기사(초안)", "article_body": "# 군산시, 경제 · 보건 지표 동반 이상 신호 (2025-05-05)\n\n## 무슨 신호인가\n군산시에서 이번 주 Mahalanobis 거리 D²=338.37(p=0.0)의\n다변량 이상이 탐지됐다. 단일 지표가 아니라 카드매출지수↓, 폐업수↑, 응급실내원↑ 등 여러 지표가 평소 분포에서 동시에 벗어났다.\n\n## 어떤 구조인가\n신호는 경제 · 보건 도메인에 걸쳐 있다. Granger 검정에서는 `감염병신고`가 `카드매출지수`를 1주 선행해, 조기경보 후보로 볼 수 있다(예측적 선행이며 인과 확정은 아님).\n\n## 정황은 무엇인가\n같은 기간 지역 보도의 주요 키워드는 변화, 소비, 매출, 최근, 파악, 지자체, 상공계, 관측되고 등이다. 다만 이는 정황 단서일 뿐,\n보도 내용이 신호의 원인이라고 단정할 수 없다.\n\n## 연구적 함의와 후속 검증\n도메인 교차 동조화는 국지적 충격의 부문 간 전이 가능성을 시사한다.\n후속으로 외생 사건(공시·행정자료) 매칭과 인접 시군 공간효과를 확인할 필요가 있다.\n\n*(자동 생성 초안 — ANTHROPIC_API_KEY 설정 시 Claude 기반 기사로 대체됩니다.)*", "article_model": "template-fallback", "sources": [{"title": "소비 관련 산 지역 동향 분석", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/0"}, {"title": "산 매출 급변… 지역경제 영향 주목", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/1"}, {"title": "[현장] 산, 상권 변화의 배경은", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/2"}, {"title": "폐업 관련 산 지역 동향 분석", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/3"}, {"title": "산 폐점 급변… 지역경제 영향 주목", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/4"}, {"title": "[현장] 산, 문닫 변화의 배경은", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/5"}, {"title": "응급실 관련 산 지역 동향 분석", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/6"}, {"title": "산 응급환자 급변… 지역경제 영향 주목", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/7"}]}, "전주시": {"region": "전주시", "n_articles": 20, "top_keywords": ["변화", "최근", "일대", "상공계", "관측되고", "나섰다", "지자체", "원인"], "topics": [{"rank": 1, "weight": 0.298, "keywords": ["신규점포", "이탈", "진단했다", "산업", "나타난", "맞물려"]}, {"rank": 2, "weight": 0.274, "keywords": ["커지고", "평소", "지표", "업계", "보이며", "다른"]}, {"rank": 3, "weight": 0.172, "keywords": ["병원", "최근", "일대", "상공계", "관측되고", "나섰다"]}, {"rank": 4, "weight": 0.161, "keywords": ["전출", "최근", "일대", "상공계", "관측되고", "나섰다"]}, {"rank": 5, "weight": 0.095, "keywords": ["창업", "파악", "최근", "원인", "관측되고", "나섰다"]}], "article_title": "전주시 분석기사(초안)", "article_body": "# 전주시, 경제 · 보건 · 인구이동 지표 동반 이상 신호 (2025-05-05)\n\n## 무슨 신호인가\n전주시에서 이번 주 Mahalanobis 거리 D²=38.65(p=0.001999)의\n다변량 이상이 탐지됐다. 단일 지표가 아니라 전출↓, 신규창업수↑, 의료기관방문↓, 전입↑ 등 여러 지표가 평소 분포에서 동시에 벗어났다.\n\n## 어떤 구조인가\n신호는 경제 · 보건 · 인구이동 도메인에 걸쳐 있다. Granger 검정에서는 `전입`가 `전출`를 3주 선행해, 조기경보 후보로 볼 수 있다(예측적 선행이며 인과 확정은 아님).\n\n## 정황은 무엇인가\n같은 기간 지역 보도의 주요 키워드는 변화, 최근, 일대, 상공계, 관측되고, 나섰다, 지자체, 원인 등이다. 다만 이는 정황 단서일 뿐,\n보도 내용이 신호의 원인이라고 단정할 수 없다.\n\n## 연구적 함의와 후속 검증\n도메인 교차 동조화는 국지적 충격의 부문 간 전이 가능성을 시사한다.\n후속으로 외생 사건(공시·행정자료) 매칭과 인접 시군 공간효과를 확인할 필요가 있다.\n\n*(자동 생성 초안 — ANTHROPIC_API_KEY 설정 시 Claude 기반 기사로 대체됩니다.)*", "article_model": "template-fallback", "sources": [{"title": "전출 관련 전주 지역 동향 분석", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/0"}, {"title": "전주 인구유출 급변… 지역경제 영향 주목", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/1"}, {"title": "[현장] 전주, 이탈 변화의 배경은", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/2"}, {"title": "창업 관련 전주 지역 동향 분석", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/3"}, {"title": "전주 개업 급변… 지역경제 영향 주목", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/4"}, {"title": "[현장] 전주, 신규점포 변화의 배경은", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/5"}, {"title": "병원 관련 전주 지역 동향 분석", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/6"}, {"title": "전주 진료 급변… 지역경제 영향 주목", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/7"}]}, "완주군": {"region": "완주군", "n_articles": 20, "top_keywords": ["변화", "최근", "일대", "상공계", "관측되고", "나섰다", "지자체", "원인"], "topics": [{"rank": 1, "weight": 0.298, "keywords": ["대기질", "신규점포", "진단했다", "산업", "나타난", "맞물려"]}, {"rank": 2, "weight": 0.274, "keywords": ["커지고", "평소", "지표", "다른", "급변", "업계"]}, {"rank": 3, "weight": 0.172, "keywords": ["소비", "최근", "일대", "상공계", "관측되고", "나섰다"]}, {"rank": 4, "weight": 0.161, "keywords": ["미세먼지", "최근", "일대", "상공계", "관측되고", "나섰다"]}, {"rank": 5, "weight": 0.095, "keywords": ["창업", "파악", "최근", "원인", "관측되고", "나섰다"]}], "article_title": "완주군 분석기사(초안)", "article_body": "# 완주군, 경제 · 인구이동 · 환경 지표 동반 이상 신호 (2025-05-05)\n\n## 무슨 신호인가\n완주군에서 이번 주 Mahalanobis 거리 D²=36.71(p=0.003686)의\n다변량 이상이 탐지됐다. 단일 지표가 아니라 미세먼지PM10↑, 신규창업수↓, 카드매출지수↓, 전출↓ 등 여러 지표가 평소 분포에서 동시에 벗어났다.\n\n## 어떤 구조인가\n신호는 경제 · 인구이동 · 환경 도메인에 걸쳐 있다. Granger 검정에서는 `인구수`가 `전출`를 1주 선행해, 조기경보 후보로 볼 수 있다(예측적 선행이며 인과 확정은 아님).\n\n## 정황은 무엇인가\n같은 기간 지역 보도의 주요 키워드는 변화, 최근, 일대, 상공계, 관측되고, 나섰다, 지자체, 원인 등이다. 다만 이는 정황 단서일 뿐,\n보도 내용이 신호의 원인이라고 단정할 수 없다.\n\n## 연구적 함의와 후속 검증\n도메인 교차 동조화는 국지적 충격의 부문 간 전이 가능성을 시사한다.\n후속으로 외생 사건(공시·행정자료) 매칭과 인접 시군 공간효과를 확인할 필요가 있다.\n\n*(자동 생성 초안 — ANTHROPIC_API_KEY 설정 시 Claude 기반 기사로 대체됩니다.)*", "article_model": "template-fallback", "sources": [{"title": "미세먼지 관련 완주 지역 동향 분석", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/0"}, {"title": "완주 황사 급변… 지역경제 영향 주목", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/1"}, {"title": "[현장] 완주, 대기질 변화의 배경은", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/2"}, {"title": "창업 관련 완주 지역 동향 분석", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/3"}, {"title": "완주 개업 급변… 지역경제 영향 주목", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/4"}, {"title": "[현장] 완주, 신규점포 변화의 배경은", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/5"}, {"title": "소비 관련 완주 지역 동향 분석", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/6"}, {"title": "완주 매출 급변… 지역경제 영향 주목", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/7"}]}, "남원시": {"region": "남원시", "n_articles": 20, "top_keywords": ["고용", "변화", "원인", "최근", "상공계", "일대", "지자체", "나섰다"], "topics": [{"rank": 1, "weight": 0.306, "keywords": ["상권", "채용", "흐름", "진단했다", "현상일", "전문가들"]}, {"rank": 2, "weight": 0.2, "keywords": ["일자리", "매출", "업계", "커지고", "영향", "지표"]}, {"rank": 3, "weight": 0.174, "keywords": ["소비", "최근", "상공계", "나섰다", "관측되고", "일대"]}, {"rank": 4, "weight": 0.163, "keywords": ["인구이동", "최근", "상공계", "나섰다", "관측되고", "원인"]}, {"rank": 5, "weight": 0.157, "keywords": ["인구감소", "커지고", "보이며", "움직임", "영향", "지역경제"]}], "article_title": "남원시 분석기사(초안)", "article_body": "# 남원시, 경제 · 보건 · 인구이동 지표 동반 이상 신호 (2025-05-05)\n\n## 무슨 신호인가\n남원시에서 이번 주 Mahalanobis 거리 D²=35.48(p=0.005385)의\n다변량 이상이 탐지됐다. 단일 지표가 아니라 카드매출지수↑, 고용률↓, 순이동↓, 의료기관방문↓ 등 여러 지표가 평소 분포에서 동시에 벗어났다.\n\n## 어떤 구조인가\n신호는 경제 · 보건 · 인구이동 도메인에 걸쳐 있다. Granger 검정에서는 `미세먼지PM10`가 `고용률`를 1주 선행해, 조기경보 후보로 볼 수 있다(예측적 선행이며 인과 확정은 아님).\n\n## 정황은 무엇인가\n같은 기간 지역 보도의 주요 키워드는 고용, 변화, 원인, 최근, 상공계, 일대, 지자체, 나섰다 등이다. 다만 이는 정황 단서일 뿐,\n보도 내용이 신호의 원인이라고 단정할 수 없다.\n\n## 연구적 함의와 후속 검증\n도메인 교차 동조화는 국지적 충격의 부문 간 전이 가능성을 시사한다.\n후속으로 외생 사건(공시·행정자료) 매칭과 인접 시군 공간효과를 확인할 필요가 있다.\n\n*(자동 생성 초안 — ANTHROPIC_API_KEY 설정 시 Claude 기반 기사로 대체됩니다.)*", "article_model": "template-fallback", "sources": [{"title": "소비 관련 남원 지역 동향 분석", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/0"}, {"title": "남원 매출 급변… 지역경제 영향 주목", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/1"}, {"title": "[현장] 남원, 상권 변화의 배경은", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/2"}, {"title": "고용 관련 남원 지역 동향 분석", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/3"}, {"title": "남원 일자리 급변… 지역경제 영향 주목", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/4"}, {"title": "[현장] 남원, 채용 변화의 배경은", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/5"}, {"title": "인구이동 관련 남원 지역 동향 분석", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/6"}, {"title": "남원 인구감소 급변… 지역경제 영향 주목", "source": "mock", "published": "2025-05-05", "url": "https://example.com/news/7"}]}};
+const BRIEF = {"무주군": {"region": "무주군", "n_articles": 0, "top_keywords": [], "topics": [], "article_title": "무주군 경제·인구 지표 동반 변동…약한 이상신호 포착", "article_body": "# 무주군 경제·인구 지표 동반 변동…약한 이상신호 포착\n\n## 1. 무슨 신호인가\n\n2026년 6월 30일 주, 전북 무주군에서 다변량 이상신호가 탐지됐다. 여러 지표가 평소와 얼마나 동시에 다르게 움직였는지를 나타내는 Mahalanobis 거리(D²)는 7.57로, 통계적 유의수준(p=0.18)에는 이르지 못한 **약한 신호**다. 신호를 만든 핵심 지표는 음식점_폐업 상승(기여 41%), 전출_인구 상승(20%), 음식점_수 상승(14%), 20대_순이동 하락(13%)이다.\n\n다만 음식점_폐업·전출_인구·20대_순이동은 모두 **[추정치]로 아직 실수집 전**이므로 사실로 단정할 수 없으며, 향후 실측 검증이 필요하다. 확정적으로 말할 수 있는 것은 **[실수집] 지표인 음식점_수의 상승(z=+1.6)**뿐이다.\n\n## 2. 어떤 구조인가\n\n핫아이템은 경제(폐업·점포 수)와 인구이동(전출·20대 순이동) 두 도메인이 섞여 있다. 표면적으로는 음식점 폐업이 늘면서 인구가 빠져나가는 그림을 떠올릴 수 있으나, **Granger 선행관계는 유의하게 검출되지 않았다.** 즉 어느 지표가 다른 지표를 시간적으로 앞서 예측한다는 근거는 없다. \n\n또한 음식점_폐업과 음식점_수가 동시에 상승한 점은 단순 해석을 경계하게 한다. 점포 수 자체가 늘며 진입·퇴출이 함께 활발한 국면일 가능성도 배제할 수 없어, 구조 해석은 신중해야 한다.\n\n## 3. 정황은 무엇인가\n\n같은 기간 무주군 관련 **수집된 뉴스가 없어** 신호를 뒷받침하거나 반박할 정황 단서를 확인하지 못했다. 따라서 현재로서는 지역 보도와 연결 지을 근거가 부재하며, 신호의 배경을 외부 맥락으로 설명하기 어렵다.\n\n## 4. 연구적 함의와 후속 검증\n\n이번 신호는 유의수준 미달, 핵심 지표 다수가 추정치, 선행관계·뉴스 부재라는 **세 겹의 한계**를 안고 있다. 결론을 내리기보다 모니터링 대상으로 분류하는 것이 적절하다. 후속 과제로 ▲음식점 폐업·전출·20대 순이동의 **실측 데이터 확보** ▲점포 수 증가와 폐업 증가의 동시성에 대한 미시 분석 ▲다음 주 신호 지속 여부 추적을 제언한다. 실측 전까지 본 신호는 **잠정적 관찰 결과**로만 다뤄야 한다.", "article_model": "claude-opus-4-8", "sources": []}, "순창군": {"region": "순창군", "n_articles": 3, "top_keywords": ["단계", "거리두기", "사회적", "명이", "코로나", "판정", "시간", "병원"], "topics": [{"rank": 1, "weight": 0.375, "keywords": ["단계", "거리두기", "사회적", "한편", "운영할", "이후"]}, {"rank": 2, "weight": 0.317, "keywords": ["최대", "천억원", "중소기업", "피해우려", "중기부", "영업점"]}, {"rank": 3, "weight": 0.308, "keywords": ["환자", "확진자인", "확진자", "확진", "판정", "받아"]}], "article_title": "순창군, 음식점 지표서 동반 이상신호…'폐업–신규' 엇갈린 움직임", "article_body": "# 순창군, 음식점 지표서 동반 이상신호…'폐업–신규' 엇갈린 움직임\n\n## 1. 무슨 신호인가\n\n2026년 6월 30일 주 전북 순창군에서 다변량 이상신호가 포착됐다. 여러 지표를 한꺼번에 살펴 '평소와 얼마나 다르게 움직였는지'를 재는 마할라노비스 거리(D²)는 10.05, 유의확률 p=0.0066으로 통상적 기준을 넘어선 이례적 패턴이다. 이는 단일 지표의 등락이 아니라 복수의 경제 지표가 동시에 평소 범위를 벗어났음을 뜻한다.\n\n## 2. 어떤 구조인가\n\n신호를 만든 핵심은 모두 경제 도메인의 음식점 지표였다. **음식점 수**가 z=-2.7로 뚜렷이 하락해 전체 기여의 72%를 차지했고, **음식점 신규**는 z=+1.7로 상승해 28%를 보탰다. 다만 음식점 신규는 '[추정치]'로, 아직 실수집 전 값이라 사실로 단정할 수 없으며 향후 실측 검증이 필요하다. 확정 지표인 음식점 수 감소가 이번 신호의 주축인 셈이다.\n\nGranger 선행관계 분석에서는 유의한 예측적 선행이 검출되지 않았다. 즉 어떤 지표가 다른 지표에 앞서 움직였다고 볼 통계적 근거가 이번 주에는 없으며, 지표 간 시간적 선후를 단정해선 안 된다.\n\n## 3. 정황은 무엇인가\n\n같은 기간 지역 보도에서는 '단계·거리두기·사회적'(토픽1, 38%), '중소기업·피해우려·중기부'(토픽2, 32%), '확진자·판정·병원'(토픽3, 31%) 등이 상위에 올랐다. 방역 단계와 소상공인 피해, 확진 동향이 동시에 거론된 정황은 음식점 수 감소라는 신호와 시기적으로 겹친다. 다만 이는 어디까지나 **정황 단서**일 뿐, 보도 내용이 곧 지표 변동의 원인이라고 확정할 수는 없다.\n\n## 4. 연구적 함의와 후속 검증\n\n이번 신호는 음식점 업황의 위축 가능성을 시사하지만, 핵심 보조지표 하나가 추정치라는 점과 선행관계가 미검출된 점이 한계다. 후속 검증으로는 ▲음식점 신규 지표의 실수집 확정 ▲폐업·신규의 순증감 추적 ▲인접 시군과의 비교 ▲방역 단계 변동 시점과의 정밀 대조가 필요하다. 신호는 '확인의 출발점'으로 다루는 것이 타당하다.", "article_model": "claude-opus-4-8", "sources": [{"title": "중기부, 13일부터 4개 산하 정책금융기관* 통해 신종 코로나 바이러스 ...", "source": "naver", "published": "2020-02-14", "url": "http://www.korea.kr/news/pressReleaseView.do?newsId=156375503&call_from=naver_news"}, {"title": "전북, 코로나19 누적 확진자 295명", "source": "naver", "published": "2020-11-27", "url": "http://www.breaknews.com/770035"}, {"title": "전주시 '사회적 거리두기 2단계' 격상", "source": "naver", "published": "2020-11-29", "url": "http://www.breaknews.com/770349"}]}, "부안군": {"region": "부안군", "n_articles": 0, "top_keywords": [], "topics": [], "article_title": "부안군, 약한 다변량 이상신호…경제·인구·환경 지표가 동시에 '미세 변동'", "article_body": "# 부안군, 약한 다변량 이상신호…경제·인구·환경 지표가 동시에 '미세 변동'\n\n## 1. 무슨 신호인가\n\n2026년 6월 마지막 주, 전북 부안군에서 여러 지표가 평소와 다르게 동시에 움직이는 신호가 포착됐다. 다변량 이상 정도를 나타내는 Mahalanobis 거리(D²)는 5.18이었으나, 통계적 유의성 지표인 p값은 0.15938로 통상의 기준(0.05)보다 높다. 즉 '여러 지표가 한꺼번에 평소와 달리 움직인 정도'는 감지됐지만, 그 강도는 우연한 변동과 뚜렷이 구별될 만큼 강하지 않은 **약한 신호**로 해석하는 것이 타당하다.\n\n## 2. 어떤 구조인가\n\n신호를 만든 세 지표는 도메인이 서로 다르다. 기여도 1위는 음식점 신규(경제, 45%, z=+2.2)로 상승 방향이었고, 전출 인구(인구이동, 33%, z=-1.9)는 하락, PM10 일평균(환경, 22%, z=-1.5)도 하락했다. 다만 음식점 신규와 전출 인구는 **[추정치]로 아직 실수집 전 데이터**이므로 사실로 단정할 수 없으며, 향후 실측 검증이 반드시 필요하다. 확정적으로 서술 가능한 지표는 **PM10 일평균 하락(실수집)** 하나뿐이다. 한편 지표 간 Granger 선행관계는 유의하게 검출되지 않았다. 따라서 어느 지표가 다른 지표를 시간적으로 앞서 예측한다고 볼 근거는 없으며, 세 지표는 현재로선 **방향만 함께 움직였을 뿐 선후 구조는 확인되지 않은** 상태다.\n\n## 3. 정황은 무엇인가\n\n같은 기간 부안군에서 수집된 지역 뉴스는 없었다. 따라서 이번 신호의 배경을 짐작할 만한 보도상의 정황 단서도 확보되지 않았다. 신호의 맥락을 해석할 외부 근거가 부재한 만큼, 현 단계에서 원인을 추정하는 것은 적절하지 않다.\n\n## 4. 연구적 함의와 후속 검증\n\n이번 사례는 **약한 신호 + 추정 지표 의존 + 뉴스 부재**라는 삼중의 한계를 안고 있다. 우선 핫아이템의 두 축인 음식점 신규·전출 인구가 실수집 데이터로 전환된 뒤 동일한 방향성이 재현되는지 확인해야 한다. 또한 p값이 높은 만큼 다음 주 신호 지속 여부를 추적해 일시적 변동인지 판단할 필요가 있다. 뉴스 수집 범위를 넓혀 정황 단서를 보강하는 작업도 병행돼야 한다.", "article_model": "claude-opus-4-8", "sources": []}};
 
 // ── KPI ──
 kpiWeek.textContent=REPORT.week.slice(5);
@@ -635,7 +377,7 @@ function select(region){
       <span class="rname">🔥 ${hp.region}</span>
       <span class="pill hot">D² = ${hp.d2.toFixed(1)}</span>
       <span class="pill">p = ${hp.p_value<1e-4?'< 0.0001':hp.p_value.toFixed(4)}</span>
-      <span class="pill">베이스라인 ${hp.n_baseline_weeks}주</span>
+      <span class="pill">${hp.method || ('베이스라인 '+hp.n_baseline_weeks+'주')}</span>
     </div>
     <div class="detail">
       <div>
@@ -645,9 +387,11 @@ function select(region){
       </div>
       <div>
         <h2 style="margin-top:14px">🔗 인과 진단 (Granger)</h2>
-        <p class="desc">선행 → 후행. 화살표 두께 = 유의도, 라벨 = 시차(주)</p>
-        ${graphHTML(hp.causal_edges)}
-        ${legendHTML(hp)}
+        ${hp.causal_edges && hp.causal_edges.length
+          ? `<p class="desc">선행 → 후행. 화살표 두께 = 유의도, 라벨 = 시차(주)</p>
+             ${graphHTML(hp.causal_edges)}${legendHTML(hp)}`
+          : `<p class="desc">횡단면(한 주 14개 시군 비교) 분석이라 시차 인과는 없습니다.
+             주간 데이터가 누적되면 Granger 선행관계가 표시됩니다.</p>`}
       </div>
     </div>
     <h2 style="margin-top:22px">🔬 연구적 해석 (자동 초안)</h2>
@@ -707,7 +451,8 @@ function itemsHTML(items){
     return `<div class="item">
       <div class="lab">
         <span class="nm">${arrow}<b>${it.indicator}</b>
-          <span class="tag" style="background:${hex}">${it.domain}</span></span>
+          <span class="tag" style="background:${hex}">${it.domain}</span>
+          ${it.estimated?'<span class="tag" style="background:#3a4250;color:#cfd8e3" title="키 미발급 — 추정치">추정</span>':''}</span>
         <span class="meta">기여 ${(it.share*100).toFixed(0)}% · z=${it.z>0?'+':''}${it.z.toFixed(1)}</span>
       </div>
       <div class="track"><div class="fill" style="width:${(it.share*100).toFixed(0)}%;background:${c}"></div></div>

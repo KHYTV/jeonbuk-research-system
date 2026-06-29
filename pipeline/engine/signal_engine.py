@@ -39,11 +39,36 @@ def load_panel(days_back: int = 30) -> pd.DataFrame:
         return pd.DataFrame()
 
     df = pd.DataFrame([dict(r) for r in rows])
-    # 시군 × 지표 최근값 pivot
-    pivot = (df.groupby(["municipality","indicator"])["value"]
-               .mean()
-               .unstack(fill_value=np.nan))
+    # (시군,지표)별 '가장 최근 수집값' 사용 — 여러 실행의 mock+real 평균 방지
+    # (실데이터가 들어온 실행이 최신이면 mock을 자동으로 덮어쓴다)
+    latest = (df.sort_values("collected_at")
+                .groupby(["municipality","indicator"], as_index=False).last())
+    pivot = latest.pivot_table(index="municipality", columns="indicator",
+                               values="value", aggfunc="last")
     return pivot
+
+
+# 인구에 비례하는 '개수' 지표 → 인구 1만명당으로 정규화 (도시 크기 효과 제거).
+# PM10/PM25·지수형은 강도(intensive)라 정규화하지 않는다.
+EXTENSIVE_INDICATORS = {
+    "음식점_수", "의료기관_수", "신규_음식점_등록", "음식점_신규", "음식점_폐업",
+    "소상공인_신규_등록", "전입_인구", "전출_인구", "20대_순이동", "감염병_신고수",
+}
+
+def normalize_per_capita(panel: pd.DataFrame) -> pd.DataFrame:
+    """개수형 지표를 인구 1만명당 밀도로 변환 → '큰 도시라서 큰 값'을 제거."""
+    if panel.empty:
+        return panel
+    out = panel.copy()
+    for col in out.columns:
+        if col not in EXTENSIVE_INDICATORS:
+            continue
+        for muni in out.index:
+            pop = MUNICIPALITIES.get(muni, {}).get("pop", 0)
+            v = out.loc[muni, col]
+            if pop and pd.notna(v):
+                out.loc[muni, col] = float(v) / pop * 10000.0
+    return out
 
 def load_places_summary() -> pd.DataFrame:
     """장소 DB에서 시군별 업종 집계"""
@@ -311,7 +336,9 @@ def run_signal_detection(run_id: str) -> Dict:
         log.warning("  패널 데이터 없음 → Mock 패널 생성")
         panel = _generate_mock_panel()
 
-    log.info(f"  패널: {panel.shape[0]}개 시군 × {panel.shape[1]}개 지표")
+    # 인구 대비 정규화 — 개수형 지표를 1만명당 밀도로(도시 크기 효과 제거)
+    panel = normalize_per_capita(panel)
+    log.info(f"  패널: {panel.shape[0]}개 시군 × {panel.shape[1]}개 지표 (인구정규화)")
 
     anomalies   = zscore_detect(panel, threshold=1.5)
     maha_scores = mahalanobis_score(panel)
