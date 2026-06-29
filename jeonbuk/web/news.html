@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>전북 뉴스 빅데이터 분석</title>
+<style>
+  :root{
+    --bg:#0f1419; --panel:#171d26; --panel2:#1e2530; --line:#2a323f;
+    --txt:#e6edf3; --muted:#8b97a7; --accent:#4da3ff; --radius:14px;
+    --shadow:0 8px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:linear-gradient(180deg,#0c1117,#0f1419);color:var(--txt);
+    font-family:"Pretendard","Segoe UI",-apple-system,system-ui,sans-serif;line-height:1.55;}
+  .wrap{max-width:1160px;margin:0 auto;padding:32px 22px 64px;}
+  header.top{display:flex;justify-content:space-between;align-items:flex-end;flex-wrap:wrap;
+    gap:16px;border-bottom:1px solid var(--line);padding-bottom:20px;margin-bottom:24px;}
+  h1{font-size:23px;margin:0 0 4px;letter-spacing:-.3px;}
+  .sub{color:var(--muted);font-size:13px;}
+  .nav a{color:var(--accent);font-size:12px;text-decoration:none;border:1px solid var(--line);
+    padding:6px 12px;border-radius:20px;}
+  .kpis{display:flex;gap:12px;}
+  .kpi{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:10px 16px;text-align:center;min-width:80px;}
+  .kpi .v{font-size:22px;font-weight:700;} .kpi .l{font-size:11px;color:var(--muted);}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+  @media(max-width:860px){.grid{grid-template-columns:1fr;}}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+    padding:20px 22px;box-shadow:var(--shadow);}
+  .card h2{font-size:15px;margin:0 0 4px;} .card .desc{color:var(--muted);font-size:12px;margin:0 0 14px;}
+
+  /* topics */
+  .topic{margin:12px 0;}
+  .topic .lab{display:flex;justify-content:space-between;font-size:13px;margin-bottom:5px;}
+  .topic .lab b{font-weight:700;} .topic .lab .pct{color:var(--muted);font-variant-numeric:tabular-nums;}
+  .topic .track{background:#0c1117;height:12px;border-radius:6px;overflow:hidden;}
+  .topic .fill{height:100%;border-radius:6px;}
+  .topic .kw{margin-top:5px;font-size:11px;color:#cfd8e3;}
+
+  /* region activity bars */
+  .rrow{display:grid;grid-template-columns:60px 1fr 40px;align-items:center;gap:9px;
+    padding:4px 0;cursor:pointer;border-radius:7px;transition:background .12s;}
+  .rrow:hover{background:var(--panel2);} .rrow.sel{background:var(--panel2);outline:1px solid var(--accent);}
+  .rrow .nm{font-size:12.5px;white-space:nowrap;}
+  .rtrack{background:#0c1117;height:15px;border-radius:5px;overflow:hidden;}
+  .rfill{height:100%;border-radius:5px;background:linear-gradient(90deg,#2f5d8a,#4da3ff);}
+  .rrow .c{font-size:11px;color:var(--muted);text-align:right;}
+
+  /* region detail */
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 4px;}
+  .chip{font-size:11px;padding:3px 9px;border-radius:20px;background:#0c1117;border:1px solid var(--line);color:#cfd8e3;}
+  .chip b{color:var(--accent);}
+  .mini{display:flex;height:14px;border-radius:5px;overflow:hidden;margin:8px 0;}
+  .mini span{display:block;}
+  .mlegend{display:flex;flex-wrap:wrap;gap:10px;font-size:10.5px;color:var(--muted);margin-top:4px;}
+  .mlegend i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:4px;}
+  .head{font-size:12.5px;padding:7px 0;border-bottom:1px solid var(--line);}
+  .head .meta{color:var(--muted);font-size:10px;}
+  .empty{color:var(--muted);font-size:12px;padding:14px 0;}
+  footer{color:var(--muted);font-size:11px;text-align:center;margin-top:28px;line-height:1.7;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div>
+      <h1>📰 전북 뉴스 빅데이터 분석 <span style="font-weight:400;color:var(--muted);font-size:13px;">구조적 토픽모델링(STM 스타일)</span></h1>
+      <div class="sub">수집 뉴스 코퍼스 전체 토픽 분해 + 시군별 드릴다운 — 지역을 클릭하면 해당 지역 뉴스 분석이 보입니다</div>
+    </div>
+    <div style="display:flex;gap:12px;align-items:center;">
+      <div class="kpis">
+        <div class="kpi"><div class="v" id="kDocs">—</div><div class="l">분석 기사</div></div>
+        <div class="kpi"><div class="v" id="kTopics">—</div><div class="l">토픽</div></div>
+      </div>
+      <span class="nav"><a href="index.html">← 신호 대시보드</a></span>
+    </div>
+  </header>
+
+  <div class="grid">
+    <div class="card">
+      <h2>🧩 전체 토픽 (코퍼스 구조)</h2>
+      <p class="desc">NMF로 분해한 잠재 주제. 막대 = 코퍼스 내 비중, 아래 = 대표어</p>
+      <div id="topics"></div>
+    </div>
+    <div class="card">
+      <h2>🗺️ 시군별 뉴스 활동량</h2>
+      <p class="desc">시군이 언급된 기사 수. <b>막대를 클릭</b>하면 그 지역 분석으로.</p>
+      <div id="activity"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:22px">
+    <div id="region"></div>
+  </div>
+
+  <footer>
+    구조적 토픽모델링 = NMF 토픽모델 + 지역 공변량 prevalence(R의 stm 근사). 지역 태깅은 기사 내 시군명 매칭이라
+    스쳐 언급된 기사도 포함될 수 있음. 뉴스가 주간 누적되면 토픽·지역 추세가 안정화됩니다.
+  </footer>
+</div>
+
+<script>
+const NEWS = {"n_docs": 223, "n_topics": 6, "topics": [{"id": 3, "keywords": ["민선", "점검", "중간", "29", "당선인", "분과", "조지훈", "지사"], "weight": 0.304, "rank": 1, "label": "민선 · 점검"}, {"id": 1, "keywords": ["맛집", "경북", "구미", "푸드로드", "강원", "충남", "남원", "강릉"], "weight": 0.156, "rank": 2, "label": "맛집 · 경북"}, {"id": 4, "keywords": ["매출", "고유", "피해지원금", "소상공인", "12", "골목상권", "전국", "지원금"], "weight": 0.147, "rank": 3, "label": "매출 · 고유"}, {"id": 0, "keywords": ["AI", "반도체", "로봇", "새만금", "피지컬", "데이터센터", "부품", "메가프로젝트"], "weight": 0.139, "rank": 4, "label": "AI · 반도체"}, {"id": 2, "keywords": ["투자", "정부", "들러리", "세우지", "인정하고", "권역", "대책", "걸맞"], "weight": 0.133, "rank": 5, "label": "투자 · 정부"}, {"id": 5, "keywords": ["서남권", "해상풍력", "컨소시엄", "한수원", "800", "MW", "사업", "활성화"], "weight": 0.12, "rank": 6, "label": "서남권 · 해상풍력"}], "regions": {"전주시": {"n_docs": 32, "topic_dist": [0.776, 0.041, 0.071, 0.062, 0.035, 0.014], "keywords": ["전주", "중간", "환경", "당선인", "점검", "민선", "분과", "29"], "headlines": [{"title": "전주시장직 인수위, 민선 9기 로드맵 완성도 높인다", "publisher": "www.jeonmin.co.kr"}, {"title": "시민주권열린전주위 민선 9기 중간 점검 나섰다", "publisher": "www.jeollailbo.com"}, {"title": "전주시 재정위기 속 조지훈호 공약 시험대…추경 감액·부채관리 검토", "publisher": "전북도민일보"}, {"title": "민선 9기 전주시장직 인수위, 중간 점검 나서", "publisher": "sjbnews.com"}, {"title": "조지훈 전주시장 당선인, 민선9기 로드맵 중간 점검", "publisher": "www.jjn.co.kr"}, {"title": " 민선9기, 기업하기 좋은 환경 조성이 전북 경제 도약의 출발점 ", "publisher": "sjbnews.com"}]}, "군산시": {"n_docs": 90, "topic_dist": [0.26, 0.071, 0.154, 0.224, 0.063, 0.228], "keywords": ["AI", "반도체", "새만금", "환경", "29", "대한민국", "로봇", "서남권"], "headlines": [{"title": "한수원- 한화오션-두산에너빌리티 컨소시엄, 전북 서남권 해상풍력 사업...", "publisher": "www.econonews.co.kr"}, {"title": "800MW 서남권 해상풍력 우선협상대상 '한수원 컨소시엄'", "publisher": "www.energy-news.co.kr"}, {"title": "한수원 컨소시엄, 800MW 규모 전북 서남권 해상풍력사업 '본격화'…우선...", "publisher": "www.e-platform.net"}, {"title": "한수원, 전북 부안 800MW 해상풍력 우선협상대상자 선정 … 10개사 컨소...", "publisher": "www.worktoday.co.kr"}, {"title": "전북 서남권 해상풍력 사업 우선협상대상자에 '한수원 컨소시엄'", "publisher": "www.hellodd.com"}, {"title": "고유가 피해지원금 '훈풍' 효과… 전북 골목상권 매출 12.1% 늘어", "publisher": "www.jeonmin.co.kr"}]}, "익산시": {"n_docs": 5, "topic_dist": [0.559, 0.143, 0.157, 0.048, 0.046, 0.046], "keywords": ["규제자유특구", "동물의약품", "차세대", "관광객", "익산시", "조성", "17", "특구"], "headlines": [{"title": " 민선9기, 기업하기 좋은 환경 조성이 전북 경제 도약의 출발점 ", "publisher": "sjbnews.com"}, {"title": "전북자치도, 차세대 동물의약품 규제자유특구 지정", "publisher": "전북도민일보"}, {"title": "전북자치도, 차세대 동물의약품 규제자유특구 지정…264억 투입 신약 개발 본격화", "publisher": "전라일보"}, {"title": "[리포트] 3년간 관광객 2,500만.. 춘천 문화관광재단 시동", "publisher": "chmbc.co.kr"}, {"title": "제17회 대한체육회장배 전국생활체육핸드볼대회 전북 Amazing·섬마을 정...", "publisher": "www.mk.co.kr"}]}, "정읍시": {"n_docs": 9, "topic_dist": [0.424, 0.385, 0.119, 0.02, 0.024, 0.027], "keywords": ["정읍시", "정읍", "맛집", "생방송투데", "규제자유특구", "GAP", "생방송", "농가"], "headlines": [{"title": "'생방송 투데이' 오늘방송 맛집 - 인생 분식, 국수 맛집 '면○○'", "publisher": "www.etoday.co.kr"}, {"title": "정읍시, 자동차관리사업장 2분기 지도·점검 완료", "publisher": "www.jeonmin.co.kr"}, {"title": "정읍시  농가 GAP 인증 검사비·심사비 연중 지원 ", "publisher": "www.newstnt.com"}, {"title": "정읍시, 농산물 경쟁력·안전성 높인다…GAP 인증비 연중 지원", "publisher": "www.pressian.com"}, {"title": "전북자치도, 차세대 동물의약품 규제자유특구 지정", "publisher": "전북도민일보"}, {"title": "전북자치도, 차세대 동물의약품 규제자유특구 지정…264억 투입 신약 개발 본격화", "publisher": "전라일보"}]}, "남원시": {"n_docs": 18, "topic_dist": [0.086, 0.874, 0.018, 0.004, 0.005, 0.013], "keywords": ["맛집", "남원", "남원시", "구미", "충남", "경북", "푸드로드", "강원"], "headlines": [{"title": "경북 구미, ‘글로벌 K-미식 관광도시’ 도약 본격화...K-푸드로드 공모...", "publisher": "www.wikitree.co.kr"}, {"title": "경상북도, 대한민국 1호 K-푸드로드 공모 최종 선정", "publisher": "www.dkilbo.com"}, {"title": "[경북 24시] 경북 구미시, 대한민국 1호 K-푸드로드 선정…국비 15억원 ...", "publisher": "www.sisajournal.com"}, {"title": "미식 관광으로 지역 상권 살리고 K-한류 세계화도 추진", "publisher": "www.kmib.co.kr"}, {"title": "“미식과 청년 문화가 만나는 길”…경북도, ‘대한민국 1호 K-푸드로드...", "publisher": "www.munhwa.com"}, {"title": "구미 송정맛길, K-푸드로드 공모 선정", "publisher": "www.m-i.kr"}]}, "김제시": {"n_docs": 5, "topic_dist": [0.691, 0.001, 0.003, 0.057, 0.069, 0.178], "keywords": ["군산", "농촌", "간담회", "김제시", "전력", "공급", "의원", "해결"], "headlines": [{"title": " 민선9기, 기업하기 좋은 환경 조성이 전북 경제 도약의 출발점 ", "publisher": "sjbnews.com"}, {"title": "‘농촌의 슬럼화 없앤다’ 전북자치도, 농촌 빈집은행 활성화 사업 ‘총력’", "publisher": "전북도민일보"}, {"title": "전주장학숙 2026년 지역상생 농촌봉사활동 성료", "publisher": "전북도민일보"}, {"title": "김의겸 의원 지역 현안 문제 해결 실타래를 풀었다", "publisher": "전북도민일보"}, {"title": "‘현장에 답 있다’ 김의겸 국회의원 지역현안 해결 척척", "publisher": "전라일보"}]}, "완주군": {"n_docs": 9, "topic_dist": [0.75, 0.03, 0.029, 0.151, 0.039, 0.001], "keywords": ["완주군", "통합", "교육", "인구", "디지털", "저출생", "기술", "인공지능"], "headlines": [{"title": "전북 행정 구역 통합…기대보단 우려", "publisher": "news.kbs.co.kr"}, {"title": "전북자치도, 저출생 공동대응 2차 릴레이 캠페인 실시", "publisher": "전북도민일보"}, {"title": "전북도의회, 초선의원 대상 '찾아가는 직무교육' 실시", "publisher": "전라일보"}, {"title": "햇빛소득 안착을 위한 단계별 점검① - 햇빛소득 정책 현황과 초기 쟁점", "publisher": "kidd.co.kr"}, {"title": "일-가정 양립 '저출생 공동대응 2차릴레이캠페인'", "publisher": "www.jjn.co.kr"}, {"title": "전북지방환경청, 상수도 사고 대응 모의훈련", "publisher": "전라일보"}]}, "진안군": {"n_docs": 5, "topic_dist": [0.391, 0.087, 0.274, 0.002, 0.095, 0.151], "keywords": ["진안군", "축제", "진안", "농어촌", "기본소득", "민속예술", "농가", "전국"], "headlines": [{"title": "이승돈 농진청장, 진안 상추 대배 농가 찾아 냉각기 점검", "publisher": "전북도민일보"}, {"title": "전북 도 ‘농어촌 기본소득’ 전국 최다…“국비 부담 확대해야”", "publisher": "news.kbs.co.kr"}, {"title": "전북 민속예술 축제 대상에 '진안 마이열두마당'", "publisher": "www.jeonmin.co.kr"}, {"title": "‘제67회 전북 민속예술 축제 ’ 진안군에서 성황리 개최", "publisher": "sjbnews.com"}]}, "무주군": {"n_docs": 2, "topic_dist": [0.149, 0.089, 0.427, 0.0, 0.117, 0.218], "keywords": ["농어촌", "기본소득", "전국", "사업", "최다", "지역화폐", "시범", "지급하"], "headlines": [{"title": "전북 도 ‘농어촌 기본소득’ 전국 최다…“국비 부담 확대해야”", "publisher": "news.kbs.co.kr"}]}, "장수군": {"n_docs": 5, "topic_dist": [0.307, 0.088, 0.38, 0.001, 0.066, 0.158], "keywords": ["전국", "대상", "농어촌", "기본소득", "장수군", "성료", "사업", "축제"], "headlines": [{"title": "전북 도 ‘농어촌 기본소득’ 전국 최다…“국비 부담 확대해야”", "publisher": "news.kbs.co.kr"}, {"title": "전국 소리꾼 291명, 장수서 판소리 열전 펼쳤다", "publisher": "www.inews24.com"}, {"title": "'17회 장수논개 전국판소리경연대회' 성료", "publisher": "www.jjn.co.kr"}, {"title": "장수군 여성 한마음 체육대회 성료…부안군, 해수욕장 개장 앞두고 정비...", "publisher": "www.sisaon.co.kr"}]}, "임실군": {"n_docs": 2, "topic_dist": [0.795, 0.041, 0.021, 0.0, 0.102, 0.041], "keywords": ["임실군", "복지", "지방세", "체납자", "우수", "점검", "운영", "2026"], "headlines": [{"title": "임실군 인수위, 업무보고·현장 점검 마무리…실행계획 구체화", "publisher": "www.pressian.com"}, {"title": "임실군 “2026년 상반기 지방세 징수 우수 시·군 선정”", "publisher": "sjbnews.com"}]}, "순창군": {"n_docs": 5, "topic_dist": [0.434, 0.057, 0.274, 0.006, 0.077, 0.152], "keywords": ["지사", "순창군", "농어촌", "기본소득", "우리", "전국", "사업", "이어"], "headlines": [{"title": "전주비전대, 순창서 스마트헬스케어 재능나눔", "publisher": "전북도민일보"}, {"title": "이북5도 함경남도 지사에 진봉헌 변호사", "publisher": "전북도민일보"}, {"title": "전북 도 ‘농어촌 기본소득’ 전국 최다…“국비 부담 확대해야”", "publisher": "news.kbs.co.kr"}, {"title": "신상복 첫 시집 '우리 마을 선생님 우리 마을 이야기, 그리고 나' 출간", "publisher": "www.news1.kr"}]}, "고창군": {"n_docs": 8, "topic_dist": [0.203, 0.11, 0.275, 0.36, 0.0, 0.053], "keywords": ["고창", "AI", "고창군", "항공기", "규제특례", "해녀", "기계", "채취나"], "headlines": [{"title": "“보름 새 5000팀 반값여행 신청” 강진, 청년에겐 70% 쏜다", "publisher": "www.joongang.co.kr"}, {"title": "삼성·SK, 4755조 원 투입해 '국가 AI 벨트' 세운다", "publisher": "www.goodkyung.com"}, {"title": "산업통상부, AI·에너지 등 5건 규제특례 의결...대한항공 로봇 활용 항...", "publisher": "www.econonews.co.kr"}, {"title": "고창군, '활력고창상' 5개 우수팀 시상…조직 혁신·군정 성과 창출 공로...", "publisher": "www.eroun.net"}, {"title": "AI 자율주행로봇의 항공기 정밀검사 허용된다", "publisher": "www.irobotnews.com"}, {"title": "AI 자율주행로봇 투입…항공기 검사 12시간→1시간 단축", "publisher": "www.sedaily.com"}]}, "부안군": {"n_docs": 12, "topic_dist": [0.162, 0.024, 0.017, 0.017, 0.009, 0.77], "keywords": ["부안군", "해상풍력", "부안", "MW", "800", "한수원", "군산", "사업"], "headlines": [{"title": "한수원- 한화오션-두산에너빌리티 컨소시엄, 전북 서남권 해상풍력 사업...", "publisher": "www.econonews.co.kr"}, {"title": "800MW 서남권 해상풍력 우선협상대상 '한수원 컨소시엄'", "publisher": "www.energy-news.co.kr"}, {"title": "한수원, 전북 부안 800MW 해상풍력 우선협상대상자 선정 … 10개사 컨소...", "publisher": "www.worktoday.co.kr"}, {"title": "한수원 품은 부안풍력… 전북 에너지판 바뀐다", "publisher": "www.newsfreezone.co.kr"}, {"title": "부안군, 민선 9기 군민 체감 성과 창출 본격화", "publisher": "www.goodnews1.com"}, {"title": "‘농촌의 슬럼화 없앤다’ 전북자치도, 농촌 빈집은행 활성화 사업 ‘총력’", "publisher": "전북도민일보"}]}}, "region_activity": {"전주시": 32, "군산시": 90, "익산시": 5, "정읍시": 9, "남원시": 18, "김제시": 5, "완주군": 9, "진안군": 5, "무주군": 2, "장수군": 5, "임실군": 2, "순창군": 5, "고창군": 8, "부안군": 12}};
+const PALETTE = ["#4da3ff","#3ecf8e","#ff6b6b","#b794f6","#ffb454","#5ad1d1","#f078fb","#9aa0ff"];
+
+document.getElementById("kDocs").textContent = NEWS.n_docs ?? "—";
+document.getElementById("kTopics").textContent = NEWS.n_topics ?? "—";
+
+// 전체 토픽
+const topicsEl = document.getElementById("topics");
+(NEWS.topics||[]).forEach(t=>{
+  const col = PALETTE[(t.rank-1)%PALETTE.length];
+  const d = document.createElement("div"); d.className="topic";
+  d.innerHTML = `<div class="lab"><b>토픽 ${t.rank} · ${t.label}</b><span class="pct">${(t.weight*100).toFixed(0)}%</span></div>
+    <div class="track"><div class="fill" style="width:${(t.weight*100).toFixed(0)}%;background:${col}"></div></div>
+    <div class="kw">${t.keywords.slice(0,8).join(" · ")}</div>`;
+  topicsEl.appendChild(d);
+});
+
+// 시군별 활동량 (클릭)
+const act = NEWS.region_activity||{};
+const maxC = Math.max(1,...Object.values(act));
+const actEl = document.getElementById("activity");
+Object.entries(act).sort((a,b)=>b[1]-a[1]).forEach(([m,c])=>{
+  const row=document.createElement("div"); row.className="rrow"; row.dataset.region=m;
+  row.innerHTML=`<div class="nm">${m}</div>
+    <div class="rtrack"><div class="rfill" style="width:${(c/maxC*100).toFixed(0)}%"></div></div>
+    <div class="c">${c}</div>`;
+  if(c>0) row.addEventListener("click",()=>selectRegion(m));
+  else row.style.opacity=.4;
+  actEl.appendChild(row);
+});
+
+function selectRegion(m){
+  document.querySelectorAll(".rrow").forEach(r=>r.classList.toggle("sel",r.dataset.region===m));
+  const r = (NEWS.regions||{})[m];
+  const el = document.getElementById("region");
+  if(!r){ el.innerHTML=`<h2>🔍 ${m}</h2><div class="empty">이 지역을 언급한 기사가 없습니다.</div>`; return; }
+  const topics = NEWS.topics||[];
+  // 토픽 분포 미니바
+  const seg = r.topic_dist.map((v,i)=>v>0.001
+    ? `<span style="width:${(v*100).toFixed(1)}%;background:${PALETTE[i%PALETTE.length]}" title="토픽${i+1} ${(v*100).toFixed(0)}%"></span>`:"").join("");
+  const legend = topics.map((t,i)=> r.topic_dist[i]>0.05
+    ? `<span><i style="background:${PALETTE[i%PALETTE.length]}"></i>${t.label} ${(r.topic_dist[i]*100).toFixed(0)}%</span>`:"").join("");
+  const chips = r.keywords.slice(0,10).map((w,i)=>`<span class="chip">${i<3?"<b>"+w+"</b>":w}</span>`).join("");
+  const heads = r.headlines.map(h=>`<div class="head">${h.title}<div class="meta">${h.publisher}</div></div>`).join("");
+  el.innerHTML = `
+    <h2>🔍 ${m} 뉴스 분석 <span style="font-weight:400;color:var(--muted);font-size:12px;">기사 ${r.n_docs}건</span></h2>
+    <p class="desc">이 지역을 언급한 기사들의 토픽 분포 · 키워드 · 대표 헤드라인</p>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">토픽 구성</div>
+    <div class="mini">${seg}</div>
+    <div class="mlegend">${legend}</div>
+    <div style="font-size:12px;color:var(--muted);margin:14px 0 2px;">상위 키워드</div>
+    <div class="chips">${chips}</div>
+    <div style="font-size:12px;color:var(--muted);margin:14px 0 2px;">대표 헤드라인</div>
+    ${heads||'<div class="empty">헤드라인 없음</div>'}
+  `;
+}
+
+// 초기: 활동량 1위 지역
+const first = Object.entries(act).sort((a,b)=>b[1]-a[1]).find(([,c])=>c>0);
+if(first) selectRegion(first[0]);
+</script>
+</body>
+</html>

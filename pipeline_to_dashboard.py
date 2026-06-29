@@ -158,6 +158,14 @@ def main() -> None:
     shutil.copy(C.BASE_DIR / "web" / "index.html", ROOT / "docs" / "index.html")
     print(f"[adapter] 실데이터 대시보드 갱신 완료 → docs/index.html (week {week})")
 
+    # 뉴스 빅데이터 분석(구조적 토픽모델링) 페이지 생성
+    from jeonbuk import news_analysis as na
+    nres = na.analyze(n_topics=6)
+    na.save(nres, week)
+    na.build_page(nres)
+    print(f"[adapter] 뉴스 분석 페이지 생성 → docs/news.html "
+          f"(기사 {nres['n_docs']}건, 토픽 {nres.get('n_topics',0)}개)")
+
 
 if __name__ == "__main__":
     main()
